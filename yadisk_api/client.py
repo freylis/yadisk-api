@@ -117,16 +117,17 @@ class YandexDisk:
             data=data,
         )
 
-    def upload_file(self, content, path='/', overwrite=False, fields=None, wait_for_finish=False):
+    def upload_file(self, file_object, path='/', overwrite=False, fields=None):
         """
         Upload file to yandex disk
         Docs: https://tech.yandex.ru/disk/api/reference/upload-docpage/
 
         Args:
-            content (bytes): file content to upload
+            file_object (file): file to upload
             path (str): path to file place
             overwrite (bool): overwrite file if it exist
             fields (list[str]|None): fields in result
+            wait_for_finish (bool): wait for finish upload
         """
         upload_path_url = self._requester.get(
             url='disk/resources/upload',
@@ -136,11 +137,11 @@ class YandexDisk:
                 'fields': fields,
             },
         )
-        upload_response = self._requester.put(
+        return self._requester.put(
             url=upload_path_url['href'],
-            data=content,
+            files={'file': file_object},
+            absolute_url=True,
         )
-        # TODO wait to finish
 
     def upload_file_by_url(
         self,
@@ -148,7 +149,6 @@ class YandexDisk:
         path='/',
         fields=None,
         disable_redirects=False,
-        wait_for_finish=False,
     ):
         """
         Upload file from url to yandex disk
