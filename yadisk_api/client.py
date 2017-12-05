@@ -1,14 +1,12 @@
+import urllib.parse
+
 from . import requester
 
 
 class YandexDisk:
     _requester_cls = requester.Requester
 
-    def __init__(
-        self,
-        token,
-        app_name=None,
-    ):
+    def __init__(self, token):
         self._requester = self._requester_cls(token=token)
 
     def get_disk_info(self):
@@ -107,7 +105,70 @@ class YandexDisk:
 
         Docs: https://tech.yandex.ru/disk/api/reference/meta-add-docpage/
         """
+        params_string = urllib.parse.urlencode(
+            {
+                'path': path,
+                'fields': fields,
+            },
+            doseq=False,
+        )
         return self._requester.patch(
-            url='v1/disk/resources/?',
+            url='disk/resources/?'.format(params_string),
             data=data,
+        )
+
+    def upload_file(self, content, path='/', overwrite=False, fields=None, wait_for_finish=False):
+        """
+        Upload file to yandex disk
+        Docs: https://tech.yandex.ru/disk/api/reference/upload-docpage/
+
+        Args:
+            content (bytes): file content to upload
+            path (str): path to file place
+            overwrite (bool): overwrite file if it exist
+            fields (list[str]|None): fields in result
+        """
+        upload_path_url = self._requester.get(
+            url='disk/resources/upload',
+            params={
+                'path': path,
+                'overwrite': overwrite,
+                'fields': fields,
+            },
+        )
+        upload_response = self._requester.put(
+            url=upload_path_url['href'],
+            data=content,
+        )
+        # TODO wait to finish
+
+    def upload_file_by_url(
+        self,
+        url,
+        path='/',
+        fields=None,
+        disable_redirects=False,
+        wait_for_finish=False,
+    ):
+        """
+        Upload file from url to yandex disk
+        Docs: https://tech.yandex.ru/disk/api/reference/upload-ext-docpage/
+
+        Args:
+            url (str): url to download file from it
+            path (str): path to yandex disk
+            fields (list[str]|None): fields in result
+            disable_redirects (bool):  disable redirects
+        """
+        params_string = urllib.parse.urlencode(
+            {
+                'url': url,
+                'path': path,
+                'fields': fields,
+                'disable_redirects': disable_redirects,
+            },
+            doseq=False,
+        )
+        upload_file_response = self._requester.post(
+            url='disk/resources/upload?{}'.format(params_string),
         )
