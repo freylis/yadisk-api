@@ -112,7 +112,7 @@ class YandexDisk:
             data=data,
         ).json()
 
-    def upload_file(self, file_object, path='/', overwrite=False, fields=None):
+    def upload_file(self, file_object, path='/', overwrite=False):
         """
         Upload file to yandex disk
         Docs: https://tech.yandex.ru/disk/api/reference/upload-docpage/
@@ -121,21 +121,20 @@ class YandexDisk:
             file_object (file): file to upload
             path (str): path to file place
             overwrite (bool): overwrite file if it exist
-            fields (list[str]|None): fields in result
         """
         upload_path_url = self._requester.get(
             url='disk/resources/upload',
             params={
                 'path': path,
                 'overwrite': overwrite,
-                'fields': fields,
             },
         )
-        return self._requester.put(
-            url=upload_path_url['href'],
+        self._requester.put(
+            url=upload_path_url.json()['href'],
             files={'file': file_object},
             absolute_url=True,
-        ).json()
+        )
+        return True
 
     def upload_file_by_url(
         self,
@@ -167,23 +166,22 @@ class YandexDisk:
             },
             doseq=False,
         )
-        self._waiting_for_finish(
+        response = self._waiting_for_finish(
             self._requester.post(
                 url='disk/resources/upload?{}'.format(params_string),
             ),
             wait_for_finish=wait_for_finish,
             sleep=sleep,
         )
-        return True
+        return response.json()
 
-    def download_file(self, path, fields=None, stream=False):
+    def download_file(self, path, stream=False):
         """
         Download file from your disk
         Docs: https://tech.yandex.ru/disk/api/reference/content-docpage/
 
         Args:
             path (str): path to file
-            fields (list[str]): fields in response
             stream (bool): stream response
 
         Returns:
@@ -191,10 +189,7 @@ class YandexDisk:
         """
         url_response = self._requester.get(
             url='disk/resources/download',
-            params={
-                'path': path,
-                'fields': fields,
-            }
+            params={'path': path,}
         )
         return self._requester.get(
             url=url_response.json()['href'],
@@ -232,19 +227,18 @@ class YandexDisk:
             },
             doseq=False,
         )
-        self._waiting_for_finish(
+        response = self._waiting_for_finish(
             self._requester.post(url='disk/resources/copy?{}'.format(params_string)),
             wait_for_finish=wait_for_finish,
             sleep=sleep,
         )
-        return True
+        return response.json()
 
     def move_resource(
         self,
         from_path,
         to_path,
         overwrite=False,
-        fields=None,
         wait_for_finish=True,
         sleep=3,
     ):
@@ -256,7 +250,6 @@ class YandexDisk:
             from_path (str): source path
             to_path (str): destination path
             overwrite (bool): overwrite file/directory if exists
-            fields (list[str]|None): response fields list
             wait_for_finish (bool): wait for operation finish
             sleep (int): sleep time in seconds if need wait to finish
         """
@@ -265,16 +258,58 @@ class YandexDisk:
                 'from': from_path,
                 'path': to_path,
                 'overwrite': overwrite,
-                'fields': fields,
             },
             doseq=False,
         )
-        self._waiting_for_finish(
+        response = self._waiting_for_finish(
             self._requester.post(url='disk/resources/move?{}'.format(params_string)),
             wait_for_finish=wait_for_finish,
             sleep=sleep,
         )
+        return response.json()
+
+    def delete_resource(self, path, permanently=False, wait_for_finish=True, sleep=3):
+        """
+        Remove file/directory to trash or at all
+
+        Args:
+            path (str): path to file/directory
+            permanently (bool): true if your want remove resource without trash
+            wait_for_finish (bool): wait for operation finish
+            sleep (int): sleep time in seconds if need wait to finish
+        """
+        params_string = urllib.parse.urlencode(
+            {
+                'path': path,
+                'permanently': permanently,
+            },
+            doseq=False,
+        )
+        self._waiting_for_finish(
+            self._requester.delete(
+                url='disk/resources?{}'.format(params_string)
+            ),
+            wait_for_finish=wait_for_finish,
+            sleep=sleep,
+        )
         return True
+
+    def create_folder(self, path, fields=None):
+        """
+        Create folder in your disk
+
+        Args:
+            path (str): path to folder
+        """
+        params_string = urllib.parse.urlencode(
+            {
+                'path': path,
+                'fields': fields,
+            },
+            doseq=False,
+        )
+        response = self._requester.put(url='disk/resources/?{}'.format(params_string))
+        return response.json()
 
     def _waiting_for_finish(self, response, wait_for_finish=True, sleep=3):
         """
