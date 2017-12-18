@@ -6,13 +6,23 @@ from . import errors
 _CODE_TO_ERROR = {
     401: errors.UnauthorizedError,
     403: errors.ForbiddenError,
-    409: errors.DiskPathDoesntExistsError,
+    409: errors.DiskPathError,
     404: errors.NotFoundError,
     412: errors.PreconditionFailed,
     413: errors.PayloadTooLarge,
     500: errors.InternalServerError,
     503: errors.ServiceUnavailable,
     507: errors.InsufficientStorageError,
+}
+
+STATUS_OK = 200
+STATUS_CREATED = 201
+STATUS_ACCEPTED = 202
+
+OK_STATUSES = {
+    STATUS_OK,
+    STATUS_CREATED,
+    STATUS_ACCEPTED,
 }
 
 
@@ -23,24 +33,19 @@ class Requester:
         self._token = token
 
     def get(self, url, params=None, **kwargs):
-        response = self.wrap(requests.get)(url=url, params=params, **kwargs)
-        return response.json()
+        return self.wrap(requests.get)(url=url, params=params, **kwargs)
 
     def post(self, url, data=None, json=None, **kwargs):
-        response = self.wrap(requests.post)(url=url, data=data, json=json, **kwargs)
-        return response.json()
+        return self.wrap(requests.post)(url=url, data=data, json=json, **kwargs)
 
     def put(self, url, data=None, **kwargs):
-        response = self.wrap(requests.put)(url=url, data=data, **kwargs)
-        return response.json() if response.text else True
+        return self.wrap(requests.put)(url=url, data=data, **kwargs)
 
     def patch(self, url, data=None, **kwargs):
-        response = self.wrap(requests.patch)(url=url, data=data, **kwargs)
-        return response.json()
+        return self.wrap(requests.patch)(url=url, data=data, **kwargs)
 
     def delete(self, url, **kwargs):
-        response = self.wrap(requests.delete)(url=url, **kwargs)
-        return response.json()
+        return self.wrap(requests.delete)(url=url, **kwargs)
 
     def wrap(self, method):
         """
@@ -57,7 +62,7 @@ class Requester:
                 kwargs['headers'] = {}
             kwargs['headers']['Authorization'] = 'OAuth {}'.format(self._token)
             response = method(url, *args, **kwargs)
-            if response.status_code in {200, 201, 202}:
+            if response.status_code in OK_STATUSES:
                 return response
 
             response_data = response.json()

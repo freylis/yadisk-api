@@ -2,7 +2,7 @@ from .client import YandexDisk
 from .errors import YandexDiskError
 from .errors import UnauthorizedError
 from .errors import ForbiddenError
-from .errors import DiskPathDoesntExistsError
+from .errors import DiskPathError
 from .errors import NotFoundError
 from .errors import RequestError
 from .errors import PreconditionFailed

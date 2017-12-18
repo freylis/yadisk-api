@@ -10,7 +10,7 @@ class ForbiddenError(YandexDiskError):
     pass
 
 
-class DiskPathDoesntExistsError(YandexDiskError):
+class DiskPathError(YandexDiskError):
     pass
 
 
