@@ -38,7 +38,11 @@ Example usage:
 
     # upload file to yandex disk
     with open('/path/to/my/file.txt', 'rb') as f:
-        disk.upload_file(f.read(), path='app:/directory/file.txt', overwrite=True)
+        disk.upload_file(
+            f,
+            path='app:/directory/file.txt',
+            overwrite=True
+        )
 
     # upload file to disk by url
     disk.upload_file_from_url(
