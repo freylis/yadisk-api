@@ -134,7 +134,7 @@ class YandexDisk:
         )
         return True
 
-    def upload_file_by_url(
+    def upload_file_from_url(
         self,
         url,
         path,
@@ -294,9 +294,6 @@ class YandexDisk:
         """
         Create folder in your disk
         Docs: https://tech.yandex.ru/disk/api/reference/create-folder-docpage/
-
-        Args:
-            path (str): path to folder
         """
         params_string = urllib.parse.urlencode(
             {
@@ -307,9 +304,9 @@ class YandexDisk:
         )
         return self._requester.put(url='disk/resources/?{}'.format(params_string)).json()
 
-    def grant_access(self, path):
+    def publish_resource(self, path):
         """
-        Grant access to resource
+        Publish_resource
         Docs: https://tech.yandex.ru/disk/api/reference/publish-docpage/
 
         Args:
@@ -320,9 +317,9 @@ class YandexDisk:
             url='disk/resources/publish?{}'.format(params_string)
         ).json()
 
-    def revoke_access(self, path):
+    def unpublish_resource(self, path):
         """
-        Revoke access to resource
+        Unpublish resource
         Docs: https://tech.yandex.ru/disk/api/reference/publish-docpage/#unpublish-q
 
         Args:
@@ -333,7 +330,7 @@ class YandexDisk:
             url='disk/resources/unpublish?{}'.format(params_string)
         ).json()
 
-    def empty_trash(self, path=None, wait_for_finish=True):
+    def empty_trash(self, path=None, wait_for_finish=True, sleep=3):
         """
         Empty trash or delete resource from trash
         Docs: https://tech.yandex.ru/disk/api/reference/trash-delete-docpage/
@@ -344,6 +341,7 @@ class YandexDisk:
         self._waiting_for_finish(
             self._requester.delete(url='disk/trash/resources/{}'.format(path_param)),
             wait_for_finish=wait_for_finish,
+            sleep=sleep,
         )
         return True
 
