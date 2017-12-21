@@ -1,7 +1,7 @@
 # yadisk-api
 Yandex.disk HTTP API Python library
 
-Get your access token first [here](https://tech.yandex.ru/disk/api/concepts/quickstart-docpage/)
+Get your access token [here](https://tech.yandex.ru/disk/api/concepts/quickstart-docpage/)
 
 Example usage:
 
