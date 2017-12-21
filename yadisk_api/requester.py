@@ -62,7 +62,9 @@ class Requester:
                 url = '{}{}'.format(self._disk_url, url)
             if 'headers' not in kwargs:
                 kwargs['headers'] = {}
-            kwargs['headers']['Authorization'] = 'OAuth {}'.format(self._token)
+
+            if kwargs.pop('without_auth', False) is not True:
+                kwargs['headers']['Authorization'] = 'OAuth {}'.format(self._token)
             response = method(url, *args, **kwargs)
             if response.status_code in OK_STATUSES:
                 return response

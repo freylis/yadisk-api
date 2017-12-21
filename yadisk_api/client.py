@@ -166,14 +166,13 @@ class YandexDisk:
             },
             doseq=False,
         )
-        response = self._waiting_for_finish(
+        return self._waiting_for_finish(
             self._requester.post(
                 url='disk/resources/upload?{}'.format(params_string),
             ),
             wait_for_finish=wait_for_finish,
             sleep=sleep,
-        )
-        return response.json()
+        ).json()
 
     def download_file(self, path, stream=False):
         """
@@ -227,12 +226,11 @@ class YandexDisk:
             },
             doseq=False,
         )
-        response = self._waiting_for_finish(
+        return self._waiting_for_finish(
             self._requester.post(url='disk/resources/copy?{}'.format(params_string)),
             wait_for_finish=wait_for_finish,
             sleep=sleep,
-        )
-        return response.json()
+        ).json()
 
     def move_resource(
         self,
@@ -261,16 +259,16 @@ class YandexDisk:
             },
             doseq=False,
         )
-        response = self._waiting_for_finish(
+        return self._waiting_for_finish(
             self._requester.post(url='disk/resources/move?{}'.format(params_string)),
             wait_for_finish=wait_for_finish,
             sleep=sleep,
-        )
-        return response.json()
+        ).json()
 
     def delete_resource(self, path, permanently=False, wait_for_finish=True, sleep=3):
         """
         Remove file/directory to trash or at all
+        Docs: https://tech.yandex.ru/disk/api/reference/delete-docpage/
 
         Args:
             path (str): path to file/directory
@@ -297,6 +295,7 @@ class YandexDisk:
     def create_folder(self, path, fields=None):
         """
         Create folder in your disk
+        Docs: https://tech.yandex.ru/disk/api/reference/create-folder-docpage/
 
         Args:
             path (str): path to folder
@@ -308,8 +307,66 @@ class YandexDisk:
             },
             doseq=False,
         )
-        response = self._requester.put(url='disk/resources/?{}'.format(params_string))
-        return response.json()
+        return self._requester.put(url='disk/resources/?{}'.format(params_string)).json()
+
+    def grant_access(self, path):
+        """
+        Grant access to resource
+        Docs: https://tech.yandex.ru/disk/api/reference/publish-docpage/
+
+        Args:
+            path (str): path to resource
+        """
+        params_string = urllib.parse.urlencode({'path': path})
+        return self._requester.put(
+            url='disk/resources/publish?{}'.format(params_string)
+        ).json()
+
+    def revoke_access(self, path):
+        """
+        Revoke access to resource
+        Docs: https://tech.yandex.ru/disk/api/reference/publish-docpage/#unpublish-q
+
+        Args:
+            path (str): path to resource
+        """
+        params_string = urllib.parse.urlencode({'path': path})
+        return self._requester.put(
+            url='disk/resources/unpublish?{}'.format(params_string)
+        ).json()
+
+    def empty_trash(self, path=None, wait_for_finish=True):
+        """
+        Empty trash or delete resource from trash
+        Docs: https://tech.yandex.ru/disk/api/reference/trash-delete-docpage/
+        """
+        path_param = '?{}'.format(
+            urllib.parse.urlencode({'path': path})
+        ) if path else ''
+        self._waiting_for_finish(
+            self._requester.delete(url='disk/trash/resources/{}'.format(path_param)),
+            wait_for_finish=wait_for_finish,
+        )
+        return True
+
+    def restore_from_trash(self, path, name=None, overwrite=False):
+        """
+        Restore resource from trash
+        Docs: https://tech.yandex.ru/disk/api/reference/trash-restore-docpage/
+        """
+        params_string = urllib.parse.urlencode(
+            {
+                'path': path,
+                'name': name,
+                'overwrite': overwrite,
+            },
+            doseq=False,
+        )
+        return self._waiting_for_finish(
+            self._requester.put(
+                url='disk/trash/resources/restore?{}'.format(params_string),
+            )
+        ).json()
 
     def _waiting_for_finish(self, response, wait_for_finish=True, sleep=3):
         """
