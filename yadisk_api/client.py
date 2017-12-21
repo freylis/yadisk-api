@@ -1,3 +1,4 @@
+import json
 import time
 import urllib.parse
 
@@ -94,22 +95,19 @@ class YandexDisk:
         }
         return self._requester.get(url='disk/resources/files', params=params).json()
 
-    def set_meta_to_file(self, path, data, fields=None):
+    def set_meta_to_resource(self, path, data, fields=None):
         """
-        Set meta-data to file
+        Set meta-data to file/directory
 
         Docs: https://tech.yandex.ru/disk/api/reference/meta-add-docpage/
         """
-        params_string = urllib.parse.urlencode(
-            {
-                'path': path,
-                'fields': fields,
-            },
-            doseq=False,
-        )
+        url_params = {'path': path}
+        if fields:
+            url_params['fields'] = fields
+        params_string = urllib.parse.urlencode(url_params, doseq=False)
         return self._requester.patch(
             url='disk/resources/?{}'.format(params_string),
-            data=data,
+            data=json.dumps({'custom_properties': data}),
         ).json()
 
     def upload_file(self, file_object, path='/', overwrite=False):
