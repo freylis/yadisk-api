@@ -7,7 +7,7 @@ Example usage:
 
     import yadisk_api
 
-    disk = yadisk_api.YandexDisk('my_token', app_name='my_app_name')
+    disk = yadisk_api.YandexDisk('my_token')
 
     # get info about my disk
     info = disk.get_disk_info()
