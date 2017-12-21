@@ -1,13 +1,13 @@
 # yadisk-api
 Yandex.disk HTTP API Python library
 
-Get your access token first [here](https://tech.yandex.ru/disk/api/concepts/quickstart-docpage/)
+Get your access token [here](https://tech.yandex.ru/disk/api/concepts/quickstart-docpage/)
 
 Example usage:
 
     import yadisk_api
 
-    disk = yadisk_api.YandexDisk('my_token', app_name='my_app_name')
+    disk = yadisk_api.YandexDisk('my_token')
 
     # get info about my disk
     info = disk.get_disk_info()
@@ -38,7 +38,11 @@ Example usage:
 
     # upload file to yandex disk
     with open('/path/to/my/file.txt', 'rb') as f:
-        disk.upload_file(f.read(), path='app:/directory/file.txt', overwrite=True)
+        disk.upload_file(
+            f,
+            path='app:/directory/file.txt',
+            overwrite=True
+        )
 
     # upload file to disk by url
     disk.upload_file_from_url(
