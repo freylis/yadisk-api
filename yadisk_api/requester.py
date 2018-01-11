@@ -33,7 +33,7 @@ OK_STATUSES = {
 }
 
 
-class Requester:
+class Requester(object):
     _disk_url = 'https://cloud-api.yandex.net/v1/'
 
     def __init__(self, token):

@@ -9,7 +9,7 @@ from . import requester
 logger = logging.Logger('yadisk-api')
 
 
-class YandexDisk:
+class YandexDisk(object):
     _SLEEP = 3
     _requester_cls = requester.Requester
 
