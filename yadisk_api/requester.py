@@ -80,7 +80,11 @@ class Requester(object):
             if kwargs.pop('without_auth', False) is not True:
                 kwargs['headers']['Authorization'] = 'OAuth {}'.format(self._token)
             response = method(url, *args, **kwargs)
-            logger.debug('Yadisk-api response status_code={} by url={}/{}'.format(response.status_code, url, method_name))
+            logger.debug('Yadisk-api response status_code={} by url={}/{}'.format(
+                response.status_code,
+                url,
+                method_name
+            ))
             if response.status_code in OK_STATUSES:
                 return response
 
