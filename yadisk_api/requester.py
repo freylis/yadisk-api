@@ -1,6 +1,11 @@
+import logging
+
 import requests
 
 from . import errors
+
+
+logger = logging.Logger('yadisk-api')
 
 
 _CODE_TO_ERROR = {
@@ -56,6 +61,14 @@ class Requester:
         - Handle response status code
         etc
         """
+        method_name = {
+            self.get: 'GET',
+            self.post: 'POST',
+            self.put: 'PUT',
+            self.patch: 'PATCH',
+            self.delete: 'DELETE',
+        }[method]
+
         def wrapped(url, *args, **kwargs):
             absolute_url = kwargs.pop('absolute_url', False)
             if not absolute_url:
@@ -63,17 +76,30 @@ class Requester:
             if 'headers' not in kwargs:
                 kwargs['headers'] = {}
 
+            logger.debug('Yadisk-api call {!r} method by url={!r}'.format(method_name, url))
             if kwargs.pop('without_auth', False) is not True:
                 kwargs['headers']['Authorization'] = 'OAuth {}'.format(self._token)
             response = method(url, *args, **kwargs)
+            logger.debug('Yadisk-api response status_code={} by url={}/{}'.format(response.status_code, url, method_name))
             if response.status_code in OK_STATUSES:
                 return response
 
-            response_data = response.json()
-            if response.status_code not in _CODE_TO_ERROR:
-                raise errors.RequestError(response_data['message'])
+            try:
+                response_msg = response.json()['message']
+            except ValueError:
+                response_msg = str(response.content)
+
+            logger.error(
+                'Yandex.disk error. Status_code={}; response body: {}'.format(
+                    response.status_code,
+                    response_msg,
+                )
+            )
 
             # handle status code
-            raise _CODE_TO_ERROR[response.status_code](response_data['message'])
+            if response.status_code not in _CODE_TO_ERROR:
+                raise errors.RequestError(response_msg)
+
+            raise _CODE_TO_ERROR[response.status_code](response_msg)
 
         return wrapped
