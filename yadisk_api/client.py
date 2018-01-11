@@ -22,7 +22,7 @@ class YandexDisk:
 
         Docs: https://tech.yandex.ru/disk/api/reference/capacity-docpage/
         """
-        logger.debug('Yadisk-api get disk info')
+        logger.info('Yadisk-api get disk info')
         return self._requester.get(url='disk/').json()
 
     def get_meta_info(
@@ -50,7 +50,7 @@ class YandexDisk:
             'preview_size': preview_size,
             'preview_crop': preview_crop,
         }
-        logger.debug('Yadisk-api get meta info (from trash={}) with params {}'.format(trash, params))
+        logger.info('Yadisk-api get meta info (from trash={}) with params {}'.format(trash, params))
         return self._requester.get(
             url='disk/{}resources'.format('trash/' if trash else ''),
             params=params,
@@ -78,7 +78,7 @@ class YandexDisk:
             'preview_crop': preview_crop,
             'media_type': media_type,
         }
-        logger.debug('Yadisk-api get files list with params {}'.format(params))
+        logger.info('Yadisk-api get files list with params {}'.format(params))
         return self._requester.get(url='disk/resources/files', params=params).json()
 
     def get_last_uploaded(
@@ -101,7 +101,7 @@ class YandexDisk:
             'preview_crop': preview_crop,
             'media_type': media_type,
         }
-        logger.debug('Yadisk-api get last uploaded with params {}'.format(params))
+        logger.info('Yadisk-api get last uploaded with params {}'.format(params))
         return self._requester.get(url='disk/resources/files', params=params).json()
 
     def set_meta_to_resource(self, path, data, fields=None):
@@ -114,7 +114,7 @@ class YandexDisk:
         if fields:
             url_params['fields'] = fields
         params_string = urllib.parse.urlencode(url_params, doseq=False)
-        logger.debug('Yadisk-api set meta {!r} to resource {!r}'.format(data, path))
+        logger.info('Yadisk-api set meta {!r} to resource {!r}'.format(data, path))
         return self._requester.patch(
             url='disk/resources/?{}'.format(params_string),
             data=json.dumps({'custom_properties': data}),
@@ -130,7 +130,7 @@ class YandexDisk:
             path (str): path to file place
             overwrite (bool): overwrite file if it exist
         """
-        logger.debug('Yadisk-api upload file to {!r}'.format(path))
+        logger.info('Yadisk-api upload file to {!r}'.format(path))
         upload_path_url = self._requester.get(
             url='disk/resources/upload',
             params={
@@ -175,7 +175,7 @@ class YandexDisk:
             },
             doseq=False,
         )
-        logger.debug('Yadisk-api upload file from url {!r} to {!r}'.format(url, path))
+        logger.info('Yadisk-api upload file from url {!r} to {!r}'.format(url, path))
         return self._waiting_for_finish(
             self._requester.post(
                 url='disk/resources/upload?{}'.format(params_string),
@@ -196,7 +196,7 @@ class YandexDisk:
         Returns:
             bytes: file content
         """
-        logger.debug('Yadisk-api download file from {!r}'.format(path))
+        logger.info('Yadisk-api download file from {!r}'.format(path))
         url_response = self._requester.get(
             url='disk/resources/download',
             params={'path': path,}
@@ -228,7 +228,7 @@ class YandexDisk:
             wait_for_finish (bool): wait for operation finish
             sleep (int): sleep time in seconds if need wait to finish
         """
-        logger.debug('Yadisk-api copy resource from {!r} to {!r}'.format(from_path, to_path))
+        logger.info('Yadisk-api copy resource from {!r} to {!r}'.format(from_path, to_path))
         params_string = urllib.parse.urlencode(
             {
                 'from': from_path,
@@ -263,7 +263,7 @@ class YandexDisk:
             wait_for_finish (bool): wait for operation finish
             sleep (int): sleep time in seconds if need wait to finish
         """
-        logger.debug('Yadisk-api move resource from {!r} to {!r}'.format(from_path, to_path))
+        logger.info('Yadisk-api move resource from {!r} to {!r}'.format(from_path, to_path))
         params_string = urllib.parse.urlencode(
             {
                 'from': from_path,
@@ -289,7 +289,7 @@ class YandexDisk:
             wait_for_finish (bool): wait for operation finish
             sleep (int): sleep time in seconds if need wait to finish
         """
-        logger.debug('Yadisk-api delete resource from {!r}'.format(path))
+        logger.info('Yadisk-api delete resource from {!r}'.format(path))
         params_string = urllib.parse.urlencode(
             {
                 'path': path,
@@ -311,7 +311,7 @@ class YandexDisk:
         Create folder in your disk
         Docs: https://tech.yandex.ru/disk/api/reference/create-folder-docpage/
         """
-        logger.debug('Yadisk-api create folder {!r}'.format(path))
+        logger.info('Yadisk-api create folder {!r}'.format(path))
         params_string = urllib.parse.urlencode(
             {
                 'path': path,
@@ -329,7 +329,7 @@ class YandexDisk:
         Args:
             path (str): path to resource
         """
-        logger.debug('Yadisk-api publish resource {!r}'.format(path))
+        logger.info('Yadisk-api publish resource {!r}'.format(path))
         params_string = urllib.parse.urlencode({'path': path})
         return self._requester.put(
             url='disk/resources/publish?{}'.format(params_string)
@@ -343,7 +343,7 @@ class YandexDisk:
         Args:
             path (str): path to resource
         """
-        logger.debug('Yadisk-api unpublish resource {!r}'.format(path))
+        logger.info('Yadisk-api unpublish resource {!r}'.format(path))
         params_string = urllib.parse.urlencode({'path': path})
         return self._requester.put(
             url='disk/resources/unpublish?{}'.format(params_string)
@@ -354,7 +354,7 @@ class YandexDisk:
         Empty trash or delete resource from trash
         Docs: https://tech.yandex.ru/disk/api/reference/trash-delete-docpage/
         """
-        logger.debug('Yadisk-api empty trash')
+        logger.info('Yadisk-api empty trash')
         path_param = '?{}'.format(
             urllib.parse.urlencode({'path': path})
         ) if path else ''
@@ -370,7 +370,7 @@ class YandexDisk:
         Restore resource from trash
         Docs: https://tech.yandex.ru/disk/api/reference/trash-restore-docpage/
         """
-        logger.debug('Yadisk-api restore {!r} from trash'.format(path))
+        logger.info('Yadisk-api restore {!r} from trash'.format(path))
         params_string = urllib.parse.urlencode(
             {
                 'path': path,
