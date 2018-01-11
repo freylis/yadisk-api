@@ -199,7 +199,7 @@ class YandexDisk:
         logger.info('Yadisk-api download file from {!r}'.format(path))
         url_response = self._requester.get(
             url='disk/resources/download',
-            params={'path': path,}
+            params={'path': path}
         )
         return self._requester.get(
             url=url_response.json()['href'],
