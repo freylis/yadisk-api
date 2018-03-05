@@ -59,7 +59,6 @@ class Requester(object):
         - Add extra headers to request
         - Change url
         - Handle response status code
-        etc
         """
         method_name = {
             self.get: 'GET',
@@ -76,11 +75,11 @@ class Requester(object):
             if 'headers' not in kwargs:
                 kwargs['headers'] = {}
 
-            logger.debug('Yadisk-api call {!r} method by url={!r}'.format(method_name, url))
+            logger.debug('Call {!r} method by url={!r}'.format(method_name, url))
             if kwargs.pop('without_auth', False) is not True:
                 kwargs['headers']['Authorization'] = 'OAuth {}'.format(self._token)
             response = method(url, *args, **kwargs)
-            logger.debug('Yadisk-api response status_code={} by url={}/{}'.format(
+            logger.debug('Response status_code={} by url={}/{}'.format(
                 response.status_code,
                 url,
                 method_name
@@ -94,9 +93,11 @@ class Requester(object):
                 response_msg = str(response.content)
 
             logger.error(
-                'Yandex.disk error. Status_code={}; response body: {}'.format(
+                'Status_code={}; response body: {}; request_url={!r}; method={!r}'.format(
                     response.status_code,
                     response_msg,
+                    url,
+                    method,
                 )
             )
 
