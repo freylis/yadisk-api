@@ -1,12 +1,12 @@
 import os
 from setuptools import setup
 
-README = open(os.path.join(os.path.dirname(__file__), 'README.rst')).read()
+README = open(os.path.join(os.path.dirname(__file__), 'README.md')).read()
 
 
 setup(
     name='yadisk-api',
-    version='1.0',
+    version='1.0.1',
     packages=['yadisk_api'],
     url='https://github.com/freylis/yadisk-api',
     license='MIT License',
@@ -23,7 +23,6 @@ setup(
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
         'Topic :: Software Development :: Libraries',
-        'Topic :: Software Development :: Cloud service',
     ],
     install_requires = [
         'requests >= 2.9.1',
