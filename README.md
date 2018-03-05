@@ -1,7 +1,10 @@
 # yadisk-api
 Yandex.disk HTTP API Python library
 
-Get your access token [here](https://tech.yandex.ru/disk/api/concepts/quickstart-docpage/)
+In first get your access token [here](https://tech.yandex.ru/disk/api/concepts/quickstart-docpage/)
+In second install package
+
+    pip install yadisk-api
 
 Example usage:
 
