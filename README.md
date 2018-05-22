@@ -95,3 +95,6 @@ Example usage:
 
     # restore resource from trash
     disk.restore_from_trash('app:/sitemap_example_movied_copy.xml')
+
+    # upload dir to disk
+    disk.upload_directory('/path/to/source', 'app:/path/to/disk', overwrite=True)

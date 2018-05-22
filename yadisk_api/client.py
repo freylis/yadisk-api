@@ -1,8 +1,12 @@
+import os
+import re
 import json
+import glob
 import time
 import logging
 import urllib.parse
 
+from . import errors
 from . import requester
 
 
@@ -144,6 +148,33 @@ class YandexDisk(object):
             absolute_url=True,
         )
         return True
+
+    def upload_directory(self, local_path, path='/', overwrite=False):
+        """
+        Upload all files in directory to disk
+
+        Args:
+            local_path (str): directory path on your storage
+            path (str): path at yadisk
+            overwrite (bool): overwrite files if it exists
+        """
+        for is_directory, item_path, related_path in self._iter_directory_content(local_path):
+            if not related_path:
+                continue
+            disk_path = os.path.join(path, related_path)
+            if is_directory:
+                try:
+                    self.create_folder(path=disk_path)
+                except errors.DiskPathError as exc:
+                    if 'уже существует папка с таким именем' not in str(exc):
+                        raise
+                continue
+            with open(item_path, 'rb') as f:
+                self.upload_file(
+                    file_object=f,
+                    path=disk_path,
+                    overwrite=overwrite,
+                )
 
     def upload_file_from_url(
         self,
@@ -412,3 +443,26 @@ class YandexDisk(object):
                 ):
                     return response
         return response
+
+    def _iter_directory_content(self, path, start_path=None):
+        """
+        All files generator
+
+        Args:
+            path (str): path to find all files
+
+        Yields:
+            bool, str, str:
+                1. is directory flag
+                2. local path to file/dir
+                3. related path to file/dir
+        """
+        if start_path is None:
+            start_path = path
+
+        path_list = glob.glob(path)
+        for path_item in path_list:
+            related_path = re.sub(r'{}\/?\*?'.format(start_path), '', path_item)
+            is_directory = os.path.isdir(path_item)
+            yield is_directory, path_item, related_path
+            yield from self._iter_directory_content(os.path.join(path_item, '*'), start_path=start_path)

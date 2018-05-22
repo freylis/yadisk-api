@@ -6,7 +6,7 @@ README = open(os.path.join(os.path.dirname(__file__), 'README.md')).read()
 
 setup(
     name='yadisk-api',
-    version='1.0.1',
+    version='1.0.2',
     packages=['yadisk_api'],
     url='https://github.com/freylis/yadisk-api',
     license='MIT License',

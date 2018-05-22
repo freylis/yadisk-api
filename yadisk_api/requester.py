@@ -61,11 +61,11 @@ class Requester(object):
         - Handle response status code
         """
         method_name = {
-            self.get: 'GET',
-            self.post: 'POST',
-            self.put: 'PUT',
-            self.patch: 'PATCH',
-            self.delete: 'DELETE',
+            requests.get: 'GET',
+            requests.post: 'POST',
+            requests.put: 'PUT',
+            requests.patch: 'PATCH',
+            requests.delete: 'DELETE',
         }[method]
 
         def wrapped(url, *args, **kwargs):
@@ -74,6 +74,12 @@ class Requester(object):
                 url = '{}{}'.format(self._disk_url, url)
             if 'headers' not in kwargs:
                 kwargs['headers'] = {}
+
+            # replace overwrite True::bool -> 'true'
+            if 'overwrite' in kwargs:
+                kwargs['overwrite'] = 'true' if kwargs['overwrite'] else 'false'
+            if 'params' in kwargs and 'overwrite' in kwargs['params']:
+                kwargs['params']['overwrite'] = 'true' if kwargs['params']['overwrite'] else 'false'
 
             logger.debug('Call {!r} method by url={!r}'.format(method_name, url))
             if kwargs.pop('without_auth', False) is not True:
@@ -96,8 +102,8 @@ class Requester(object):
                 'Status_code={}; response body: {}; request_url={!r}; method={!r}'.format(
                     response.status_code,
                     response_msg,
-                    url,
-                    method,
+                    response.url,
+                    method_name,
                 )
             )
 
