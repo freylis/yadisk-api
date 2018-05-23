@@ -3,6 +3,7 @@ import re
 import json
 import glob
 import time
+import hashlib
 import logging
 import urllib.parse
 
@@ -124,7 +125,7 @@ class YandexDisk(object):
             data=json.dumps({'custom_properties': data}),
         ).json()
 
-    def upload_file(self, file_object, path='/', overwrite=False):
+    def upload_file(self, file_object, path='/', overwrite=False, skip_exists=True):
         """
         Upload file to yandex disk
         Docs: https://tech.yandex.ru/disk/api/reference/upload-docpage/
@@ -133,7 +134,16 @@ class YandexDisk(object):
             file_object (file): file to upload
             path (str): path to file place
             overwrite (bool): overwrite file if it exist
+            skip_exists (bool): not upload file if it exists and has same hash/dates
         """
+        if (
+            overwrite
+            and skip_exists
+            and self._is_same_file(file_object, path)
+        ):
+            logger.debug('File {!r} already uploaded'.format(path))
+            return True
+
         logger.info('Upload file to {!r}'.format(path))
         upload_path_url = self._requester.get(
             url='disk/resources/upload',
@@ -149,7 +159,7 @@ class YandexDisk(object):
         )
         return True
 
-    def upload_directory(self, local_path, path='/', overwrite=False):
+    def upload_directory(self, local_path, path='/', overwrite=False, skip_exists=True):
         """
         Upload all files in directory to disk
 
@@ -157,6 +167,7 @@ class YandexDisk(object):
             local_path (str): directory path on your storage
             path (str): path at yadisk
             overwrite (bool): overwrite files if it exists
+            skip_exists (bool): not upload file if it exists and has same hash/dates
         """
         for is_directory, item_path, related_path in self._iter_directory_content(local_path):
             if not related_path:
@@ -174,6 +185,7 @@ class YandexDisk(object):
                     file_object=f,
                     path=disk_path,
                     overwrite=overwrite,
+                    skip_exists=skip_exists,
                 )
 
     def upload_file_from_url(
@@ -466,3 +478,15 @@ class YandexDisk(object):
             is_directory = os.path.isdir(path_item)
             yield is_directory, path_item, related_path
             yield from self._iter_directory_content(os.path.join(path_item, '*'), start_path=start_path)
+
+    def _is_same_file(self, fileobject, path):
+        """
+        Exists same file
+        """
+        # check file changed
+        try:
+            file_meta_info = self.get_meta_info(path=path, fields=['md5'])
+        except errors.NotFoundError:
+            return False
+        current_file_md5 = hashlib.md5(fileobject.read()).hexdigest()
+        return file_meta_info['md5'] == current_file_md5
